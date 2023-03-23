@@ -19,7 +19,11 @@ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 include_directories(.)
 #include_directories(src)
 
-add_executable(ffenestr main.cpp fenster.h)
+IF (WIN32)
+    add_executable(ffenestr WIN32 main.cpp fenster.h)
+ELSE()
+    add_executable(ffenestr main.cpp fenster.h)
+ENDIF()
 
 
 #IF (WIN32)

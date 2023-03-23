@@ -174,20 +174,24 @@ static LRESULT CALLBACK fenster_wndproc(HWND hwnd, UINT msg, WPARAM wParam,
   switch (msg) {
   case WM_PAINT: {
     PAINTSTRUCT ps;
-    HDC hdc = BeginPaint(hwnd, &ps);
-    HDC memdc = CreateCompatibleDC(hdc);
-    HBITMAP hbmp = CreateCompatibleBitmap(hdc, f->width, f->height);
-    HGDIOBJ oldbmp = SelectObject(memdc, hbmp);
-    BITMAPINFO bi = {{sizeof(BITMAPINFO), f->width, -f->height, 1, 32, BI_BITFIELDS}};
-    bi.bmiColors[0].rgbRed = 0xff;
-    bi.bmiColors[0].rgbGreen = 0x00;
-    bi.bmiColors[0].rgbBlue = 0x7f;
-    SetDIBitsToDevice(memdc, 0, 0, f->width, f->height, 0, 0, 0, f->height,
+    /*HDC hdc = */BeginPaint(hwnd, &ps);
+    HDC hdc = GetDC(hwnd);
+    //HDC memdc = CreateCompatibleDC(hdc);
+    //HBITMAP hbmp = CreateCompatibleBitmap(hdc, f->width, f->height);
+    //HGDIOBJ oldbmp = SelectObject(memdc, hbmp);
+    //BITMAPINFO bi = {{sizeof(BITMAPINFO), f->width, -f->height, 1, 32, BI_BITFIELDS}};
+      BITMAPINFO bi = {{sizeof(BITMAPINFO), f->width, f->height, 1, 32}};
+    //bi.bmiColors[0].rgbRed = 0xff;
+    //bi.bmiColors[0].rgbGreen = 0x00;
+    //bi.bmiColors[0].rgbBlue = 0x7f;
+    //SetDIBitsToDevice(memdc, 0, 0, f->width, f->height, 0, 0, 0, f->height,
+    SetDIBitsToDevice(hdc, 0, 0, f->width, f->height, 0, 0, 0, (std::uint32_t)f->height,
                       f->buf, (BITMAPINFO *)&bi, DIB_RGB_COLORS);
-    BitBlt(hdc, 0, 0, f->width, f->height, memdc, 0, 0, SRCCOPY);
-    SelectObject(memdc, oldbmp);
-    DeleteObject(hbmp);
-    DeleteDC(memdc);
+    //BitBlt(hdc, 0, 0, f->width, f->height, memdc, 0, 0, SRCCOPY);
+    //SelectObject(memdc, oldbmp);
+    //DeleteObject(hbmp);
+    //DeleteDC(memdc);
+    ReleaseDC(hwnd, hdc);
     EndPaint(hwnd, &ps);
   } break;
   case WM_CLOSE:
