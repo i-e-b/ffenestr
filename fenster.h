@@ -170,29 +170,25 @@ static const uint8_t FENSTER_KEYCODES[] = {0,27,49,50,51,52,53,54,55,56,57,48,45
 // clang-format on
 static LRESULT CALLBACK fenster_wndproc(HWND hwnd, UINT msg, WPARAM wParam,
                                         LPARAM lParam) {
-  struct fenster *f = (struct fenster *)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+  auto *f = (struct fenster *)GetWindowLongPtr(hwnd, GWLP_USERDATA);
   switch (msg) {
   case WM_PAINT: {
-    PAINTSTRUCT ps;
-    /*HDC hdc = */BeginPaint(hwnd, &ps);
-    HDC hdc = GetDC(hwnd);
-    //HDC memdc = CreateCompatibleDC(hdc);
-    //HBITMAP hbmp = CreateCompatibleBitmap(hdc, f->width, f->height);
-    //HGDIOBJ oldbmp = SelectObject(memdc, hbmp);
-    //BITMAPINFO bi = {{sizeof(BITMAPINFO), f->width, -f->height, 1, 32, BI_BITFIELDS}};
-      BITMAPINFO bi = {{sizeof(BITMAPINFO), f->width, f->height, 1, 32}};
-    //bi.bmiColors[0].rgbRed = 0xff;
-    //bi.bmiColors[0].rgbGreen = 0x00;
-    //bi.bmiColors[0].rgbBlue = 0x7f;
-    //SetDIBitsToDevice(memdc, 0, 0, f->width, f->height, 0, 0, 0, f->height,
-    SetDIBitsToDevice(hdc, 0, 0, f->width, f->height, 0, 0, 0, (std::uint32_t)f->height,
-                      f->buf, (BITMAPINFO *)&bi, DIB_RGB_COLORS);
-    //BitBlt(hdc, 0, 0, f->width, f->height, memdc, 0, 0, SRCCOPY);
-    //SelectObject(memdc, oldbmp);
-    //DeleteObject(hbmp);
-    //DeleteDC(memdc);
-    ReleaseDC(hwnd, hdc);
-    EndPaint(hwnd, &ps);
+      PAINTSTRUCT ps;
+      HDC hdc = BeginPaint(hwnd, &ps);
+      HDC memdc = CreateCompatibleDC(hdc);
+      HBITMAP hbmp = CreateCompatibleBitmap(hdc, f->width, f->height);
+      HGDIOBJ oldbmp = SelectObject(memdc, hbmp);
+      BITMAPINFO bi = {{sizeof(bi), f->width, -f->height, 1, 32, BI_RGB}};
+      bi.bmiColors[0].rgbRed = 0xff;
+      bi.bmiColors[0].rgbGreen = 0xff;
+      bi.bmiColors[0].rgbBlue = 0xff;
+      SetDIBitsToDevice(memdc, 0, 0, f->width, f->height, 0, 0, 0, f->height,
+                        f->buf, (BITMAPINFO *) &bi, DIB_RGB_COLORS);
+      BitBlt(hdc, 0, 0, f->width, f->height, memdc, 0, 0, SRCCOPY);
+      SelectObject(memdc, oldbmp);
+      DeleteObject(hbmp);
+      DeleteDC(memdc);
+      EndPaint(hwnd, &ps);
   } break;
   case WM_CLOSE:
     DestroyWindow(hwnd);
@@ -310,7 +306,7 @@ FENSTER_API int fenster_loop(struct fenster *f) {
 }
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 FENSTER_API void fenster_sleep(int64_t ms) { Sleep((DWORD)ms); }
 FENSTER_API int64_t fenster_time() {
   LARGE_INTEGER freq, count;
