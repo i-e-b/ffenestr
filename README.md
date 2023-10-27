@@ -1,2 +1,2 @@
 # ffenestr
-Test of using zserge/fenster from CLion
+Test of using https://github.com/zserge/fenster from CLion

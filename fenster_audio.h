@@ -22,10 +22,10 @@ struct fenster_audio {
 #include <mmsystem.h>
 #include <windows.h>
 struct fenster_audio {
-  WAVEHDR header;
-  HWAVEOUT wo;
-  WAVEHDR hdr[2];
-  int16_t buf[2][FENSTER_AUDIO_BUFSZ];
+    WAVEHDR header;
+    HWAVEOUT wo;
+    WAVEHDR hdr[2];
+    int16_t buf[2][FENSTER_AUDIO_BUFSZ];
 };
 #elif defined(__linux__)
 struct fenster_audio {
@@ -95,36 +95,36 @@ FENSTER_API void fenster_audio_write(struct fenster_audio *fa, float *buf,
 }
 #elif defined(_WIN32)
 FENSTER_API int fenster_audio_open(struct fenster_audio *fa) {
-  WAVEFORMATEX wfx = {WAVE_FORMAT_PCM, 1, FENSTER_SAMPLE_RATE, FENSTER_SAMPLE_RATE * 2, 1, 16, 0};
-  waveOutOpen(&fa->wo, WAVE_MAPPER, &wfx, 0, 0, CALLBACK_NULL);
-  for (int i = 0; i < 2; i++) {
-    fa->hdr[i].lpData = fa->buf[i];
-    fa->hdr[i].dwBufferLength = FENSTER_AUDIO_BUFSZ * 2;
-    waveOutPrepareHeader(fa->wo, &fa->hdr[i], sizeof(WAVEHDR));
-    waveOutWrite(fa->wo, &fa->hdr[i], sizeof(WAVEHDR));
-  }
-  return 0;
+    WAVEFORMATEX wfx = {WAVE_FORMAT_PCM, 1, FENSTER_SAMPLE_RATE, FENSTER_SAMPLE_RATE * 2, 1, 16, 0};
+    waveOutOpen(&fa->wo, WAVE_MAPPER, &wfx, 0, 0, CALLBACK_NULL);
+    for (int i = 0; i < 2; i++) {
+        fa->hdr[i].lpData = fa->buf[i];
+        fa->hdr[i].dwBufferLength = FENSTER_AUDIO_BUFSZ * 2;
+        waveOutPrepareHeader(fa->wo, &fa->hdr[i], sizeof(WAVEHDR));
+        waveOutWrite(fa->wo, &fa->hdr[i], sizeof(WAVEHDR));
+    }
+    return 0;
 }
 FENSTER_API int fenster_audio_available(struct fenster_audio *fa) {
-  for (int i = 0; i < 2; i++)
-    if (fa->hdr[i].dwFlags & WHDR_DONE)
-      return FENSTER_AUDIO_BUFSZ;
-  return 0;
+    for (int i = 0; i < 2; i++)
+        if (fa->hdr[i].dwFlags & WHDR_DONE)
+            return FENSTER_AUDIO_BUFSZ;
+    return 0;
 }
 FENSTER_API void fenster_audio_write(struct fenster_audio *fa, float *buf,
                                      size_t n) {
-  for (int i = 0; i < 2; i++) {
-    if (fa->hdr[i].dwFlags & WHDR_DONE) {
-      for (unsigned j = 0; j < n; j++) {
-        fa->buf[i][j] = (int16_t)(buf[j] * 32767);
-      }
-      waveOutWrite(fa->wo, &fa->hdr[i], sizeof(WAVEHDR));
-      return;
+    for (int i = 0; i < 2; i++) {
+        if (fa->hdr[i].dwFlags & WHDR_DONE) {
+            for (unsigned j = 0; j < n; j++) {
+                fa->buf[i][j] = (int16_t)(buf[j] * 32767);
+            }
+            waveOutWrite(fa->wo, &fa->hdr[i], sizeof(WAVEHDR));
+            return;
+        }
     }
-  }
 }
 FENSTER_API void fenster_audio_close(struct fenster_audio *fa) {
-  waveOutClose(fa->wo);
+    waveOutClose(fa->wo);
 }
 #elif defined(__linux__)
 int snd_pcm_open(void **, const char *, int, int);
